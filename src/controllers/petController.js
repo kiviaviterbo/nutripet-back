@@ -2,15 +2,13 @@ import Pet from "../models/Pet.js";
 import Usuario from "../models/Usuario.js";
 
 const petController = {
-
   criar: async (req, res) => {
     try {
-      const { nome, especie, raca, idade, peso, usuario_id } = req.body;
-      // Verifica se usuário existe
+      const { nome, especie, raca, idade, peso, genero, usuario_id, imagem_url } = req.body;
       const usuario = await Usuario.findByPk(usuario_id);
       if (!usuario) return res.status(404).json({ error: "Usuário não encontrado" });
 
-      const pet = await Pet.create({ nome, especie, raca, idade, peso, usuario_id });
+      const pet = await Pet.create({ nome, especie, raca, idade, peso, genero, usuario_id, imagem_url });
       res.status(201).json(pet);
     } catch (error) {
       res.status(500).json({ error: error.message });
@@ -19,7 +17,9 @@ const petController = {
 
   listar: async (req, res) => {
     try {
-      const pets = await Pet.findAll({ include: Usuario });
+      const { usuario_id } = req.query;
+      const where = usuario_id ? { where: { usuario_id } } : {};
+      const pets = await Pet.findAll(where);
       res.json(pets);
     } catch (error) {
       res.status(500).json({ error: error.message });
@@ -28,8 +28,7 @@ const petController = {
 
   buscarPorId: async (req, res) => {
     try {
-      const { id } = req.params;
-      const pet = await Pet.findByPk(id, { include: Usuario });
+      const pet = await Pet.findByPk(req.params.id);
       if (!pet) return res.status(404).json({ error: "Pet não encontrado" });
       res.json(pet);
     } catch (error) {
@@ -40,10 +39,12 @@ const petController = {
   atualizar: async (req, res) => {
     try {
       const { id } = req.params;
-      const { nome, especie, raca, idade, peso } = req.body;
+      const { nome, especie, raca, idade, peso, genero, imagem_url } = req.body;
+
       const pet = await Pet.findByPk(id);
       if (!pet) return res.status(404).json({ error: "Pet não encontrado" });
-      await pet.update({ nome, especie, raca, idade, peso });
+
+      await pet.update({ nome, especie, raca, idade, peso, genero, imagem_url });
       res.json(pet);
     } catch (error) {
       res.status(500).json({ error: error.message });
@@ -60,8 +61,7 @@ const petController = {
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
-  }
-
+  },
 };
 
 export default petController;

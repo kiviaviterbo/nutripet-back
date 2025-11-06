@@ -1,15 +1,49 @@
 import Usuario from "../models/Usuario.js";
 import Assinatura from "../models/Assinatura.js";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+
 
 const usuarioController = {
 
   criar: async (req, res) => {
     try {
       const { nome, email, senha, telefone } = req.body;
-      const usuario = await Usuario.create({ nome, email, senha, telefone });
-      res.status(201).json(usuario);
+
+      if (!nome || !email || !senha)
+        return res.status(400).json({ msg: "Preencha todos os campos obrigatórios." });
+
+      // Verifica se o e-mail já existe
+      const usuarioExistente = await Usuario.findOne({ where: { email } });
+      if (usuarioExistente)
+        return res.status(400).json({ msg: "E-mail já cadastrado." });
+
+      // Criptografa a senha antes de salvar
+      const senhaHash = await bcrypt.hash(senha, 10);
+
+      // Cria o usuário no banco
+      const usuario = await Usuario.create({
+        nome,
+        email,
+        senha: senhaHash,
+        telefone,
+      });
+
+      // Gera token JWT (para login automático após cadastro)
+      const token = jwt.sign(
+        { id: usuario.id, email: usuario.email },
+        process.env.JWT_SECRET,
+        { expiresIn: "1h" }
+      );
+
+      // Retorna dados + token, no mesmo formato do login
+      res.status(201).json({
+        usuario: { id: usuario.id, nome: usuario.nome, email: usuario.email },
+        token,
+      });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      console.error("Erro ao cadastrar usuário:", error);
+      res.status(500).json({ msg: "Erro interno no servidor.", error: error.message });
     }
   },
 

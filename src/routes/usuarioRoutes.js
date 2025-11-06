@@ -8,7 +8,7 @@ const router = Router();
 router.post("/", usuarioController.criar);
 
 // Rotas protegidas
-//router.use(authMiddleware);
+router.use(authMiddleware);
 router.get("/", usuarioController.listar);
 router.get("/premium/:id", usuarioController.verificarPremium);
 router.get("/:id", usuarioController.buscarPorId);
