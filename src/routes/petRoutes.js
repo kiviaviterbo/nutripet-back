@@ -5,7 +5,7 @@ import authMiddleware from "../middlewares/authMiddleware.js";
 const router = Router();
 
 // Protegido: só usuários logados podem criar/editar/deletar
-//router.use(authMiddleware);
+router.use(authMiddleware);
 
 router.get("/", petController.listar);
 router.get("/:id", petController.buscarPorId);

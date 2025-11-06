@@ -20,6 +20,10 @@ const Pet = sequelize.define("Pet", {
     type: DataTypes.STRING,
     allowNull: true
   },
+  genero: {
+    type: DataTypes.STRING(10),
+    allowNull: true
+  },
   idade: {
     type: DataTypes.INTEGER,
     allowNull: true
@@ -27,7 +31,12 @@ const Pet = sequelize.define("Pet", {
   peso: {
     type: DataTypes.DECIMAL(5,2),
     allowNull: true
-  }
+  },
+  imagem_url: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+  
 }, {
   tableName: "pet",
   timestamps: true

@@ -31,7 +31,8 @@ const TabelaNutricional = sequelize.define("TabelaNutricional", {
   omega_3: DataTypes.STRING,
   mananoligossacarideo: DataTypes.STRING,
   umidade: DataTypes.STRING,
-  ph_urinario: DataTypes.STRING
+  ph_urinario: DataTypes.STRING,
+  imagem_url: DataTypes.STRING
 }, {
   tableName: "tabelanutricional",
   timestamps: true
