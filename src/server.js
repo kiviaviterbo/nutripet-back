@@ -22,7 +22,7 @@ const startServer = async () => {
     console.log("Conexão com MySQL estabelecida com sucesso!");
 
     // Sincroniza todas as models com o banco
-    await sequelize.sync({ alter: true });
+    await sequelize.sync({ alter: false});
     console.log("Models sincronizadas com o banco.");
 
     const PORT = process.env.PORT || 5000;
