@@ -15,6 +15,26 @@ const TabelaNutricional = sequelize.define("TabelaNutricional", {
     type: DataTypes.STRING,
     allowNull: false
   },
+  variacao: {
+    type: DataTypes.ENUM("Filhote", "Adulto", "Castrado", "Sênior +7"),
+    allowNull: false,
+  },
+  tipo: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  marca: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  carboidrato: {
+    type: DataTypes.FLOAT,
+    allowNull: true,
+  },
+  corante_artificial: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+  },
   proteina_bruta: DataTypes.STRING,
   extrato_etereo: DataTypes.STRING,
   materia_fibrosa: DataTypes.STRING,
