@@ -33,7 +33,7 @@ const usuarioController = {
       const token = jwt.sign(
         { id: usuario.id, email: usuario.email },
         process.env.JWT_SECRET,
-        { expiresIn: "1h" }
+        { expiresIn: "7h" }
       );
 
       // Retorna dados + token, no mesmo formato do login
@@ -98,6 +98,37 @@ const usuarioController = {
       res.json({ message: "Usuário deletado com sucesso" });
     } catch (error) {
       res.status(500).json({ error: error.message });
+    }
+  },
+  alterarSenha: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { senhaAtual, novaSenha } = req.body;
+
+      if (!senhaAtual || !novaSenha) {
+        return res.status(400).json({ msg: "Envie a senha atual e a nova senha." });
+      }
+
+      const usuario = await Usuario.findByPk(id);
+      if (!usuario) return res.status(404).json({ msg: "Usuário não encontrado." });
+
+      // Verifica se a senha atual está correta
+      const senhaConfere = await bcrypt.compare(senhaAtual, usuario.senha);
+      if (!senhaConfere) {
+        return res.status(401).json({ msg: "Senha atual incorreta." });
+      }
+
+      // Criptografa a nova senha
+      const novaSenhaHash = await bcrypt.hash(novaSenha, 10);
+
+      // Atualiza
+      usuario.senha = novaSenhaHash;
+      await usuario.save();
+
+      return res.json({ msg: "Senha alterada com sucesso!" });
+    } catch (err) {
+      console.error("Erro ao alterar senha:", err);
+      return res.status(500).json({ msg: "Erro interno no servidor." });
     }
   },
 
