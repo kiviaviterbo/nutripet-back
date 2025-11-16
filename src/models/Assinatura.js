@@ -20,15 +20,25 @@ const Assinatura = sequelize.define("Assinatura", {
   forma_pagamento: {
     type: DataTypes.STRING,
     allowNull: true
+  },
+  status: {
+    type: DataTypes.ENUM("pendente", "ativo", "cancelado"),
+    defaultValue: "pendente"
+  },
+  valor: {
+    type: DataTypes.DECIMAL(10, 2),
+    defaultValue: 149.70
+  },
+  payment_subscription_id: {
+    type: DataTypes.STRING,
+    allowNull: true
   }
 }, {
   tableName: "assinatura",
   timestamps: true
 });
 
-// Relacionamento com Usuario
 Usuario.hasMany(Assinatura, { foreignKey: "usuario_id", onDelete: "CASCADE" });
 Assinatura.belongsTo(Usuario, { foreignKey: "usuario_id" });
-
 
 export default Assinatura;
