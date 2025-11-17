@@ -25,10 +25,6 @@ const Usuario = sequelize.define("Usuario", {
     type: DataTypes.STRING,
     allowNull: false
   },
-  telefone: {
-    type: DataTypes.STRING,
-    allowNull: true
-  },
   cep: {
     type: DataTypes.STRING(9),
     allowNull: true,
