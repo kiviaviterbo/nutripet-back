@@ -9,11 +9,11 @@ dotenv.config();
 const app = express();
 
 app.use(cors({
-  origin: "http://localhost:3000", 
+  origin: "*",
   credentials: true
 }));
-app.use(express.json()); 
 
+app.use(express.json());
 app.use("/", router);
 
 const startServer = async () => {
@@ -21,33 +21,19 @@ const startServer = async () => {
     await sequelize.authenticate();
     console.log("Conexão com MySQL estabelecida com sucesso!");
 
-    // Sincroniza todas as models com o banco
-    await sequelize.sync({ alter: false});
-    console.log("Models sincronizadas com o banco.");
+    await sequelize.sync({ alter: false });
+    console.log("Models sincronizadas com sucesso!");
 
-    const PORT = process.env.PORT || 5000;
+    const PORT = process.env.PORT || 3001;
     app.listen(PORT, () => {
-      console.log(`Servidor rodando em http://localhost:${PORT}`);
+      console.log(`Servidor rodando na porta ${PORT}`);
     });
+
   } catch (error) {
-    console.error("Erro ao conectar com o banco:", error);
+    console.error("Erro ao conectar no banco:", error);
   }
 };
 
 startServer();
 
-
-/* import express from "express";
-import cors from "cors";
-import dotenv from "dotenv";
-import routes from "./routes/index.js";
-
-dotenv.config();
-const app = express();
-
-app.use(cors());
-app.use(express.json());
-app.use("/api", routes);
-
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`✅ Servidor NutriPet rodando na porta ${PORT}`)); */
+export default app;
