@@ -127,6 +127,15 @@ const consultaController = {
 
       const consultas = await Consulta.findAll({
         where: { usuario_id },
+        attributes: [
+          "id",
+          "nome_pet", 
+          "data_solicitacao",
+          "createdAt",
+          "updatedAt",
+          "status",
+          "documento_url"
+        ],
         order: [["createdAt", "DESC"]]
       });
 
