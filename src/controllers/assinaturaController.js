@@ -1,4 +1,5 @@
 import Assinatura from "../models/Assinatura.js";
+import Consulta from "../models/Consulta.js";
 import Usuario from "../models/Usuario.js";
 import { v4 as uuidv4 } from "uuid";
 
@@ -127,27 +128,30 @@ const assinaturaController = {
       res.status(500).json({ error: error.message });
     }
   },
- cancelarAssinatura: async (req, res) => {
+cancelarAssinatura: async (req, res) => {
   try {
     const { id } = req.params;
 
     const assinatura = await Assinatura.findByPk(id);
+
     if (!assinatura) {
       return res.status(404).json({ error: "Assinatura não encontrada" });
     }
 
-    // Atualiza usuário para FREE
+    await Consulta.destroy({
+      where: { assinatura_id: id }
+    });
+
     await Usuario.update(
       { plano: "free", premium_expira_em: null },
       { where: { id: assinatura.usuario_id } }
     );
 
-    // Remove a assinatura do banco
     await assinatura.destroy();
 
     return res.json({
       ok: true,
-      message: "Assinatura cancelada e removida com sucesso."
+      message: "Assinatura cancelada e todas as consultas removidas."
     });
 
   } catch (error) {
