@@ -8,31 +8,49 @@ const assinaturaController = {
   criarAssinatura: async (req, res) => {
     try {
       const { userId, metodo } = req.body;
+
       const user = await Usuario.findByPk(userId);
       if (!user) return res.status(404).json({ error: "Usuário não encontrado" });
 
+      const assinaturaAtiva = await Assinatura.findOne({
+        where: { usuario_id: userId },
+        order: [["createdAt", "DESC"]],
+      });
+
+      const agora = new Date();
+
+      if (
+        assinaturaAtiva &&
+        assinaturaAtiva.status === "ativo" &&
+        new Date(assinaturaAtiva.data_fim) > agora
+      ) {
+        return res.status(403).json({
+          error: "ASSINATURA_ATIVA",
+          message: "Sua assinatura premium ainda está ativa.",
+        });
+      }
+
       const payment_subscription_id = `demo_${uuidv4()}`;
-      const now = new Date();
 
       const assinatura = await Assinatura.create({
         usuario_id: user.id,
         payment_subscription_id,
         status: "pendente",
         valor: 149.7,
-        data_inicio: now,
+        data_inicio: agora,
         data_fim: null,
         forma_pagamento: metodo || "cartao",
       });
 
-      const checkoutUrl = `${
-        process.env.FRONTEND_URL || "http://localhost:3000"
-      }/fake-checkout/${payment_subscription_id}?metodo=${metodo || "card"}`;
+      const checkoutUrl = `${process.env.FRONTEND_URL || "http://localhost:3000"
+        }/fake-checkout/${payment_subscription_id}?metodo=${metodo || "card"}`;
 
       return res.json({
         subscriptionId: payment_subscription_id,
         checkoutUrl,
         message: "Checkout fictício criado. Simule o pagamento no front-end.",
       });
+
     } catch (err) {
       console.error(err);
       return res.status(500).json({ error: "Erro ao criar assinatura" });
@@ -128,37 +146,37 @@ const assinaturaController = {
       res.status(500).json({ error: error.message });
     }
   },
-cancelarAssinatura: async (req, res) => {
-  try {
-    const { id } = req.params;
+  cancelarAssinatura: async (req, res) => {
+    try {
+      const { id } = req.params;
 
-    const assinatura = await Assinatura.findByPk(id);
+      const assinatura = await Assinatura.findByPk(id);
 
-    if (!assinatura) {
-      return res.status(404).json({ error: "Assinatura não encontrada" });
+      if (!assinatura) {
+        return res.status(404).json({ error: "Assinatura não encontrada" });
+      }
+
+      await Consulta.destroy({
+        where: { assinatura_id: id }
+      });
+
+      await Usuario.update(
+        { plano: "free", premium_expira_em: null },
+        { where: { id: assinatura.usuario_id } }
+      );
+
+      await assinatura.destroy();
+
+      return res.json({
+        ok: true,
+        message: "Assinatura cancelada e todas as consultas removidas."
+      });
+
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: "Erro ao cancelar assinatura." });
     }
-
-    await Consulta.destroy({
-      where: { assinatura_id: id }
-    });
-
-    await Usuario.update(
-      { plano: "free", premium_expira_em: null },
-      { where: { id: assinatura.usuario_id } }
-    );
-
-    await assinatura.destroy();
-
-    return res.json({
-      ok: true,
-      message: "Assinatura cancelada e todas as consultas removidas."
-    });
-
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: "Erro ao cancelar assinatura." });
-  }
-},
+  },
 
 
   atualizar: async (req, res) => {
