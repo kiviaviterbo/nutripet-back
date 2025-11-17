@@ -5,16 +5,9 @@ import jwt from "jsonwebtoken";
 
 const usuarioController = {
 
-  // =============================
-  // CADASTRAR USUÁRIO
-  // =============================
   criar: async (req, res) => {
     try {
-      const {
-        cpf, nome, email, senha, telefone,
-        cep, endereco, numero, estado, bairro,
-        data_nascimento, profissao, renda, celular
-      } = req.body;
+      const { cpf, nome, email, senha } = req.body;
 
       if (!cpf || !nome || !email || !senha)
         return res.status(400).json({ msg: "Preencha todos os campos obrigatórios." });
@@ -30,9 +23,11 @@ const usuarioController = {
       const senhaHash = await bcrypt.hash(senha, 10);
 
       const usuario = await Usuario.create({
-        cpf, nome, email, senha: senhaHash, telefone,
-        cep, endereco, numero, estado, bairro,
-        data_nascimento, profissao, renda, celular
+        cpf,
+        nome,
+        email,
+        senha: senhaHash,
+        plano: "free"
       });
 
       const token = jwt.sign(
@@ -53,7 +48,7 @@ const usuarioController = {
 
     } catch (error) {
       console.error("Erro criar usuário:", error);
-      return res.status(500).json({ msg: "Erro interno.", error });
+      return res.status(500).json({ msg: "Erro interno ao criar usuário." });
     }
   },
 
@@ -88,26 +83,37 @@ const usuarioController = {
     try {
       const { id } = req.params;
 
-      const camposPermitidos = {
-        nome: req.body.nome,
-        email: req.body.email,
-        telefone: req.body.telefone,
-        cep: req.body.cep,
-        endereco: req.body.endereco,
-        numero: req.body.numero,
-        estado: req.body.estado,
-        bairro: req.body.bairro,
-        data_nascimento: req.body.data_nascimento,
-        profissao: req.body.profissao,
-        renda: req.body.renda,
-        celular: req.body.celular
-      };
-
       const usuario = await Usuario.findByPk(id);
       if (!usuario)
         return res.status(404).json({ error: "Usuário não encontrado" });
 
-      await usuario.update(camposPermitidos);
+      const {
+        nome,
+        email,
+        cep,
+        endereco,
+        numero,
+        estado,
+        bairro,
+        data_nascimento,
+        profissao,
+        renda,
+        celular
+      } = req.body;
+
+      await usuario.update({
+        nome,
+        email,
+        cep,
+        endereco,
+        numero,
+        estado,
+        bairro,
+        data_nascimento,
+        profissao,
+        renda,
+        celular
+      });
 
       res.json(usuario);
 
